@@ -6,6 +6,7 @@ def test():
     #             .limit(4)
     #             .sum())
     print(Stream.range(5)
-                .collect(collectors.to_list()))
+                .map(str)
+                .collect(collectors.joining(', ', '[', ']')))
 
 test()

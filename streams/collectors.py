@@ -72,7 +72,7 @@ class joining(Collector[str, List[str], str]):
         result.append(value)
 
     def finisher(self, result: List[str]) -> str:
-        return self.suffix + self.delimiter.join(result) + self.suffix
+        return self.prefix + self.delimiter.join(result) + self.suffix
 
 
 class mapping(Collector[_T, _A, _R], Generic[_T, _U, _A, _R]):
