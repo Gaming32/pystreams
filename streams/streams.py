@@ -4,7 +4,7 @@
 import abc
 import operator
 from typing import (TYPE_CHECKING, Any, Callable, Generic, Iterable, Iterator,
-                    Optional, Tuple, TypeVar, Union, final)
+                    Optional, Tuple, TypeVar, Union, cast, final)
 
 if TYPE_CHECKING:
     from _typeshed import SupportsLessThan
@@ -52,7 +52,7 @@ class Stream(Generic[_T]):
     def __init__(self, it: Union[Iterable[_T], Iterator[_T]]) -> None:
         if hasattr(it, '__iter__'):
             it = iter(it)
-        self.it = it # type: ignore
+        self.it = cast(Iterator[_T], it)
 
     def __iter__(self) -> Iterator[_T]:
         return self.it
