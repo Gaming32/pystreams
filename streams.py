@@ -3,7 +3,7 @@
 
 import operator
 from typing import (TYPE_CHECKING, Any, Callable, Generic, Iterable, Iterator,
-                    Optional, TypeVar, Union, final)
+                    Optional, Tuple, TypeVar, Union, final)
 
 if TYPE_CHECKING:
     from _typeshed import SupportsLessThan
@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 _T = TypeVar('_T')
 _R = TypeVar('_R')
 _U = TypeVar('_U')
+
 if TYPE_CHECKING:
     _T_SupportsLessThan = TypeVar('_T_SupportsLessThan', bound=SupportsLessThan)
 
@@ -168,6 +169,15 @@ class Stream(Generic[_T]):
         except StopIteration:
             return None
         return self.reduce_identity(result, accumulator)
+
+    def collect(self, supplier: Callable[[], _R], accumulator: Callable[[_R, _T], Any]) -> _R:
+        result = supplier()
+        for v in self.it:
+            accumulator(result, v)
+        return result
+
+    def collect_collector(self, collector: Tuple[Callable[[], _R], Callable[[_R, _T], Any]]) -> _R:
+        return self.collect(*collector)
 
 
 def test():
