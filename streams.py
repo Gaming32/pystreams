@@ -8,10 +8,11 @@ from typing import (TYPE_CHECKING, Any, Callable, Generic, Iterable, Iterator,
 if TYPE_CHECKING:
     from _typeshed import SupportsLessThan
 
-if TYPE_CHECKING:
-    _T_SupportsLessThan = TypeVar('_T_SupportsLessThan', bound=SupportsLessThan)
 _T = TypeVar('_T')
 _R = TypeVar('_R')
+_U = TypeVar('_U')
+if TYPE_CHECKING:
+    _T_SupportsLessThan = TypeVar('_T_SupportsLessThan', bound=SupportsLessThan)
 
 
 @final
@@ -156,7 +157,7 @@ class Stream(Generic[_T]):
             r = range(start, stop, step)
         return Stream(r)
 
-    def reduce_identity(self, identity: _T, accumulator: Callable[[_T, _T], _T]) -> _T:
+    def reduce_identity(self, identity: _U, accumulator: Callable[[_U, _T], _U]) -> _U:
         for v in self.it:
             identity = accumulator(identity, v)
         return identity
