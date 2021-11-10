@@ -92,10 +92,7 @@ class Stream(Generic[_T]):
     def filter(self, predicate: Callable[[_T], bool]) -> 'Stream[_T]':
         return Stream(filter(predicate, self.it))
 
-    def find_any(self) -> Optional[_T]:
-        return next(self.it, None)
-
-    def find_first(self) -> Optional[_T]:
+    def get_one(self) -> Optional[_T]:
         return next(self.it, None)
 
     def flat_map(self, mapper: Callable[[_T], Union[Iterable[_R], Iterator[_R]]]) -> 'Stream[_R]':
