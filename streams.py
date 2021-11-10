@@ -1,6 +1,7 @@
 """Python version of Java streams"""
 
 
+import abc
 import operator
 from typing import (TYPE_CHECKING, Any, Callable, Generic, Iterable, Iterator,
                     Optional, Tuple, TypeVar, Union, final)
@@ -11,9 +12,35 @@ if TYPE_CHECKING:
 _T = TypeVar('_T')
 _R = TypeVar('_R')
 _U = TypeVar('_U')
+_A = TypeVar('_A')
 
 if TYPE_CHECKING:
     _T_SupportsLessThan = TypeVar('_T_SupportsLessThan', bound=SupportsLessThan)
+
+
+class Collector(abc.ABC, Generic[_T, _A, _R]):
+    @abc.abstractmethod
+    def supplier(self) -> _A:
+        pass
+
+    @abc.abstractmethod
+    def accumulator(self, result: _A, value: _T) -> Any:
+        pass
+
+    @abc.abstractmethod
+    def finisher(self, result: _A) -> _R:
+        pass
+
+    @staticmethod
+    def of(supplier: Callable[[], _R], accumulator: Callable[[_R, _T], Any]) -> 'Collector[_T, _R, _R]':
+        class WrapperCollector(Collector):
+            def supplier(self) -> _R:
+                return supplier()
+            def accumulator(self, result: _R, value: _T) -> Any:
+                return accumulator(result, value)
+            def finisher(self, result: _R) -> _R:
+                return result
+        return WrapperCollector()
 
 
 @final
@@ -170,14 +197,14 @@ class Stream(Generic[_T]):
             return None
         return self.reduce_identity(result, accumulator)
 
-    def collect(self, supplier: Callable[[], _R], accumulator: Callable[[_R, _T], Any]) -> _R:
-        result = supplier()
-        for v in self.it:
-            accumulator(result, v)
-        return result
+    def collect_simple(self, supplier: Callable[[], _R], accumulator: Callable[[_R, _T], Any]) -> _R:
+        return self.collect(Collector.of(supplier, accumulator))
 
-    def collect_collector(self, collector: Tuple[Callable[[], _R], Callable[[_R, _T], Any]]) -> _R:
-        return self.collect(*collector)
+    def collect(self, collector: Collector[_T, Any, _R]) -> _R:
+        result = collector.supplier()
+        for value in self.it:
+            collector.accumulator(result, value)
+        return collector.finisher(result)
 
 
 def test():
