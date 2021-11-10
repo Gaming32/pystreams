@@ -1,8 +1,9 @@
 """Python version of Java streams"""
 
 
+import operator
 from typing import (TYPE_CHECKING, Any, Callable, Generic, Iterable, Iterator,
-                    Optional, TypeVar, Union, final, overload)
+                    Optional, TypeVar, Union, final)
 
 if TYPE_CHECKING:
     from _typeshed import SupportsLessThan
@@ -143,13 +144,7 @@ class Stream(Generic[_T]):
         return sum / count
 
     def sum(self):
-        try:
-            sum = next(self.it)
-        except StopIteration:
-            return None
-        for v in self.it:
-            sum += v
-        return sum
+        return self.reduce(operator.add)
 
     @staticmethod
     def range(start: int, stop: Optional[int] = None, step: Optional[int] = None) -> 'Stream[int]':
@@ -161,11 +156,22 @@ class Stream(Generic[_T]):
             r = range(start, stop, step)
         return Stream(r)
 
+    def reduce(self, accumulator: Callable[[_T, _T], _T]) -> Optional[_T]:
+        try:
+            result = next(self.it)
+        except StopIteration:
+            return None
+        for v in self.it:
+            result = accumulator(result, v)
+        return result
+
 
 def test():
     print(Stream.iterate('a', (lambda x: chr(ord(x) + 1)))
-                .limit(26)
+                .limit(4)
                 .sum())
+    print(Stream.range(5)
+                .average())
 
 
 if __name__ == '__main__':
