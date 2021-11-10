@@ -156,22 +156,23 @@ class Stream(Generic[_T]):
             r = range(start, stop, step)
         return Stream(r)
 
+    def reduce_identity(self, identity: _T, accumulator: Callable[[_T, _T], _T]) -> _T:
+        for v in self.it:
+            identity = accumulator(identity, v)
+        return identity
+
     def reduce(self, accumulator: Callable[[_T, _T], _T]) -> Optional[_T]:
         try:
             result = next(self.it)
         except StopIteration:
             return None
-        for v in self.it:
-            result = accumulator(result, v)
-        return result
+        return self.reduce_identity(result, accumulator)
 
 
 def test():
     print(Stream.iterate('a', (lambda x: chr(ord(x) + 1)))
                 .limit(4)
                 .sum())
-    print(Stream.range(5)
-                .average())
 
 
 if __name__ == '__main__':
