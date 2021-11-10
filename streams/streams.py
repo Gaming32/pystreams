@@ -17,6 +17,8 @@ _A = TypeVar('_A')
 if TYPE_CHECKING:
     _T_SupportsLessThan = TypeVar('_T_SupportsLessThan', bound=SupportsLessThan)
 
+__all__ = ['Collector', 'Stream']
+
 
 class Collector(abc.ABC, Generic[_T, _A, _R]):
     @abc.abstractmethod
@@ -205,13 +207,3 @@ class Stream(Generic[_T]):
         for value in self.it:
             collector.accumulator(result, value)
         return collector.finisher(result)
-
-
-def test():
-    print(Stream.iterate('a', (lambda x: chr(ord(x) + 1)))
-                .limit(4)
-                .sum())
-
-
-if __name__ == '__main__':
-    test()
