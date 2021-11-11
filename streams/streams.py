@@ -67,10 +67,10 @@ class Stream(Generic[_T]):
         return any(predicate(x) for x in self.it)
 
     @staticmethod
-    def concat(a: 'Stream[_T]', b: 'Stream[_T]') -> 'Stream[_T]':
+    def concat(*streams: 'Stream[_T]') -> 'Stream[_T]':
         def it():
-            yield from a
-            yield from b
+            for stream in streams:
+                yield from stream.it
         return Stream(it())
 
     def count(self) -> int:
@@ -86,7 +86,7 @@ class Stream(Generic[_T]):
         return Stream(it())
 
     @staticmethod
-    def empty() -> 'Stream':
+    def empty() -> 'Stream[Any]':
         return Stream(())
 
     def filter(self, predicate: Callable[[_T], bool]) -> 'Stream[_T]':

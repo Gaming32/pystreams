@@ -28,5 +28,7 @@ def test():
                 .map(str)
                 .collect(collectors.joining(', ', '[', ']')))
     print_primes(7)
+    print(Stream.concat(Stream.range(3), Stream.range(7, 10))
+                .to_list())
 
 test()
