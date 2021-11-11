@@ -19,12 +19,14 @@ def print_primes(i: int):
 
 
 def test():
-    # print(Stream.iterate('a', (lambda x: chr(ord(x) + 1)))
-    #             .limit(4)
-    #             .sum())
-    # print(Stream.range(5)
-    #             .map(str)
-    #             .collect(collectors.joining(', ', '[', ']')))
+    print(Stream.iterate('a', (lambda x: chr(ord(x) + 1)))
+                .limit(4)
+                .sum())
+    print(Stream.range(5)
+                .collect(collectors.to_list()))
+    print(Stream.range(5)
+                .map(str)
+                .collect(collectors.joining(', ', '[', ']')))
     print_primes(7)
 
 test()

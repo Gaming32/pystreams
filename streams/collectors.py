@@ -178,8 +178,15 @@ def reducing_identity(identity: _T, op: Callable[[_T, _T], _T]) -> Collector[_T,
     return reducing_mapper(identity, (lambda x: x), op)
 
 
-def to_list() -> Collector[_T, Any, List[_T]]:
-    return Collector.of(list, list.append)
+class to_list(Collector[_T, Any, List[_T]], Generic[_T]):
+    def supplier(self) -> List[_T]:
+        return []
+
+    def accumulator(self, result: List[_T], value: _T) -> None:
+        result.append(value)
+
+    def finisher(self, result: List[_T]) -> List[_T]:
+        return result
 
 
 class to_dict(Collector[_T, Dict[_K, _U], Dict[_K, _U]], Generic[_T, _K, _U]):
@@ -203,5 +210,12 @@ class to_dict(Collector[_T, Dict[_K, _U], Dict[_K, _U]], Generic[_T, _K, _U]):
         return result
 
 
-def to_set() -> Collector[_T, Any, Set[_T]]:
-    return Collector.of(set, set.add)
+class to_set(Collector[_T, Any, Set[_T]], Generic[_T]):
+    def supplier(self) -> Set[_T]:
+        return set()
+
+    def accumulator(self, result: Set[_T], value: _T) -> None:
+        result.add(value)
+
+    def finisher(self, result: Set[_T]) -> Set[_T]:
+        return result
