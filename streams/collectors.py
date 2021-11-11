@@ -2,6 +2,21 @@ from typing import Any, Callable, Dict, Generic, List, Optional, Set, Tuple, Typ
 
 from .streams import Collector, Stream
 
+__all__ = [
+    'collecting_and_then',
+    'grouping_by',
+    'joining',
+    'mapping',
+    'partition',
+    'partition_downstream',
+    'reducing',
+    'reducing_mapper',
+    'reducing_identity',
+    'to_list',
+    'to_dict',
+    'to_set',
+]
+
 _T = TypeVar('_T')
 _A = TypeVar('_A')
 _R = TypeVar('_R')
@@ -38,20 +53,20 @@ class collecting_and_then(Collector[_T, _A, _RR], Generic[_T, _A, _R, _RR]):
         return self.new_finisher(self.downstream.finisher(result))
 
 
-class grouping_by(Collector[_T, dict[_K, list[_T]], dict[_K, list[_T]]], Generic[_T, _K]):
+class grouping_by(Collector[_T, Dict[_K, List[_T]], Dict[_K, List[_T]]], Generic[_T, _K]):
     classifier: Callable[[_T], _K]
 
     def __init__(self, classifier: Callable[[_T], _K]) -> None:
         self.classifier = classifier
 
-    def supplier(self) -> dict[_K, list[_T]]:
+    def supplier(self) -> Dict[_K, List[_T]]:
         return {}
 
-    def accumulator(self, result: dict[_K, list[_T]], value: _T) -> None:
+    def accumulator(self, result: Dict[_K, List[_T]], value: _T) -> None:
         group = self.classifier(value)
         result.setdefault(group, []).append(value)
 
-    def finisher(self, result: dict[_K, list[_T]]) -> dict[_K, list[_T]]:
+    def finisher(self, result: Dict[_K, List[_T]]) -> Dict[_K, List[_T]]:
         return result
 
 
