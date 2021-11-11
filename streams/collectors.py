@@ -25,14 +25,25 @@ _K = TypeVar('_K')
 _U = TypeVar('_U')
 _D = TypeVar('_D')
 
-class _NOTHING_CLASS: pass
+
+class _NOTHING_CLASS:
+    def __repr__(self) -> str:
+        return '_NOTHING'
+
 _NOTHING = _NOTHING_CLASS()
+
 
 class _Wrapper(Generic[_T]):
     value: _T
 
     def __init__(self, value: _T) -> None:
         self.value = value
+
+    def __str__(self) -> str:
+        return f'_Wrapper: {self.value!s}'
+
+    def __repr__(self) -> str:
+        return f'_Wrapper({self.value!r})'
 
 
 class collecting_and_then(Collector[_T, _A, _RR], Generic[_T, _A, _R, _RR]):

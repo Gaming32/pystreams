@@ -4,7 +4,7 @@
 import abc
 import operator
 from typing import (TYPE_CHECKING, Any, Callable, Generic, Iterable, Iterator,
-                    Optional, Tuple, TypeVar, Union, cast, final)
+                    Optional, TypeVar, Union, cast, final, overload)
 
 if TYPE_CHECKING:
     from _typeshed import SupportsLessThan
@@ -204,3 +204,6 @@ class Stream(Generic[_T]):
         for value in self.it:
             collector.accumulator(result, value)
         return collector.finisher(result)
+
+    def __repr__(self) -> str:
+        return f'Stream({self.it!r})'

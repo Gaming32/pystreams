@@ -24,6 +24,8 @@ def test():
                 .sum())
     print(Stream.range(10)
                 .collect(collectors.grouping_by(lambda x: x % 3)))
+    print(Stream.range(1, 5)
+                .collect(collectors.reducing(lambda x, y: x * y)))
     print(Stream.range(5)
                 .map(str)
                 .collect(collectors.joining(', ', '[', ']')))
