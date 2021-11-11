@@ -1,4 +1,6 @@
-from typing import Iterator
+import operator
+from typing import Any, Iterator
+
 from streams import Stream, collectors
 
 
@@ -29,8 +31,14 @@ def test():
     print(Stream.range(5)
                 .map(str)
                 .collect(collectors.joining(', ', '[', ']')))
+    print(Stream.range(5)
+                .collect(collectors.mapping[int, str, Any, str](
+                    str, collectors.joining(', ', '[', ']')
+                )))
+    print(Stream.range(4)
+                .collect(collectors.reducing_identity(4, operator.add)))
     print_primes(7)
     print(Stream.concat(Stream.range(3), Stream.range(7, 10))
-                .to_list())
+                .collect(collectors.to_list()))
 
 test()

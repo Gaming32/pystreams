@@ -32,6 +32,9 @@ class _NOTHING_CLASS:
 
 _NOTHING = _NOTHING_CLASS()
 
+def _identity(x: _T) -> _T:
+    return x
+
 
 class _Wrapper(Generic[_T]):
     value: _T
@@ -63,6 +66,9 @@ class collecting_and_then(Collector[_T, _A, _RR], Generic[_T, _A, _R, _RR]):
     def finisher(self, result: _A) -> _RR:
         return self.new_finisher(self.downstream.finisher(result))
 
+    def __repr__(self) -> str:
+        return f'collectors.collecting_and_then({self.downstream!r}, {self.new_finisher!r})'
+
 
 class grouping_by(Collector[_T, Dict[_K, List[_T]], Dict[_K, List[_T]]], Generic[_T, _K]):
     classifier: Callable[[_T], _K]
@@ -79,6 +85,9 @@ class grouping_by(Collector[_T, Dict[_K, List[_T]], Dict[_K, List[_T]]], Generic
 
     def finisher(self, result: Dict[_K, List[_T]]) -> Dict[_K, List[_T]]:
         return result
+
+    def __repr__(self) -> str:
+        return f'collectors.grouping_by({self.classifier!r})'
 
 
 class joining(Collector[str, List[str], str]):
@@ -100,6 +109,9 @@ class joining(Collector[str, List[str], str]):
     def finisher(self, result: List[str]) -> str:
         return self.prefix + self.delimiter.join(result) + self.suffix
 
+    def __repr__(self) -> str:
+        return f'collectors.joining({self.delimiter!r}, {self.prefix!r}, {self.suffix!r})'
+
 
 class mapping(Collector[_T, _A, _R], Generic[_T, _U, _A, _R]):
     mapper: Callable[[_T], _U]
@@ -118,6 +130,9 @@ class mapping(Collector[_T, _A, _R], Generic[_T, _U, _A, _R]):
     def finisher(self, result: _A) -> _R:
         return self.downstream.finisher(result)
 
+    def __repr__(self) -> str:
+        return f'collectors.mapping({self.mapper!r}, {self.downstream!r})'
+
 
 class partition(Collector[_T, Tuple[List[_T], List[_T]], Tuple[List[_T], List[_T]]], Generic[_T]):
     predicate: Callable[[_T], bool]
@@ -134,6 +149,9 @@ class partition(Collector[_T, Tuple[List[_T], List[_T]], Tuple[List[_T], List[_T
 
     def finisher(self, result: Tuple[List[_T], List[_T]]) -> Tuple[List[_T], List[_T]]:
         return result
+
+    def __repr__(self) -> str:
+        return f'collectors.partition({self.predicate!r})'
 
 
 class partition_downstream(Collector[_T, Tuple[List[_T], List[_T]], Tuple[_D, _D]], Generic[_T, _D, _A]):
@@ -157,6 +175,9 @@ class partition_downstream(Collector[_T, Tuple[List[_T], List[_T]], Tuple[_D, _D
             Stream(result[1]).collect(self.downstream)
         )
 
+    def __repr__(self) -> str:
+        return f'collectors.partition_downstream({self.predicate!r}, {self.downstream!r})'
+
 
 class reducing(Collector[_T, _Wrapper[Union[_T, _NOTHING_CLASS]], Optional[_T]], Generic[_T]):
     op: Callable[[_T, _T], _T]
@@ -179,6 +200,9 @@ class reducing(Collector[_T, _Wrapper[Union[_T, _NOTHING_CLASS]], Optional[_T]],
         assert not isinstance(result.value, _NOTHING_CLASS)
         return result.value
 
+    def __repr__(self) -> str:
+        return f'collectors.reducing({self.op!r})'
+
 
 class reducing_mapper(Collector[_T, _Wrapper[_U], _U], Generic[_T, _U]):
     identity: _U
@@ -199,9 +223,14 @@ class reducing_mapper(Collector[_T, _Wrapper[_U], _U], Generic[_T, _U]):
     def finisher(self, result: _Wrapper[_U]) -> _U:
         return result.value
 
+    def __repr__(self) -> str:
+        if self.mapper is _identity:
+            return f'collectors.reducing_identity({self.identity!r}, {self.op!r})'
+        return f'collectors.reducing_mapper({self.identity!r}, {self.mapper!r}, {self.op!r})'
+
 
 def reducing_identity(identity: _T, op: Callable[[_T, _T], _T]) -> Collector[_T, Any, _T]:
-    return reducing_mapper(identity, (lambda x: x), op)
+    return reducing_mapper(identity, _identity, op)
 
 
 class to_list(Collector[_T, Any, List[_T]], Generic[_T]):
@@ -213,6 +242,9 @@ class to_list(Collector[_T, Any, List[_T]], Generic[_T]):
 
     def finisher(self, result: List[_T]) -> List[_T]:
         return result
+
+    def __repr__(self) -> str:
+        return f'collectors.to_list()'
 
 
 class to_dict(Collector[_T, Dict[_K, _U], Dict[_K, _U]], Generic[_T, _K, _U]):
@@ -235,6 +267,9 @@ class to_dict(Collector[_T, Dict[_K, _U], Dict[_K, _U]], Generic[_T, _K, _U]):
     def finisher(self, result: Dict[_K, _U]) -> Dict[_K, _U]:
         return result
 
+    def __repr__(self) -> str:
+        return f'collectors.to_dict({self.key_mapper!r}, {self.value_mapper!r})'
+
 
 class to_set(Collector[_T, Any, Set[_T]], Generic[_T]):
     def supplier(self) -> Set[_T]:
@@ -245,3 +280,6 @@ class to_set(Collector[_T, Any, Set[_T]], Generic[_T]):
 
     def finisher(self, result: Set[_T]) -> Set[_T]:
         return result
+
+    def __repr__(self) -> str:
+        return f'collectors.to_set()'
